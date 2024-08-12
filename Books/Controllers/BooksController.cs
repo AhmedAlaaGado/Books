@@ -19,12 +19,21 @@ namespace Books.Controllers
             _publisherService = publisherService;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int pageNumber = 1, int pageSize = 2)
         {
-            var books = await _bookService.GetAllBooks();
-            var model = books.Select(b => b.ToViewModel()).ToList();
+            var (books, totalCount) = await _bookService.GetAllBooks(pageNumber, pageSize);
 
-            return View(model);
+            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+            var viewModel = new BookListViewModel
+            {
+                Books = books.Select(b => b.ToViewModel()).ToList(),
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalPages = totalPages
+            };
+
+            return View(viewModel);
         }
 
         public async Task<IActionResult> Create()

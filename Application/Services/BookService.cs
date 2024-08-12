@@ -14,23 +14,32 @@ namespace Application.Interfaces
             _context = context;
         }
 
-        public async Task<List<BookDto>> GetAllBooks()
+        public async Task<(List<BookDto> Books, int TotalCount)> GetAllBooks(int pageNumber, int pageSize)
         {
-            return await _context.Books
-                .Include(b => b.Author)
-                .Include(b => b.Publisher)
-                .Select(b => new BookDto
-                {
-                    Id = b.Id,
-                    Title = b.Title,
-                    AuthorId = b.AuthorId,
-                    AuthorName = b.Author.Name,
-                    PublisherId = b.PublisherId,
-                    PublisherName = b.Publisher.Name,
-                    Genre = b.Genre,
-                    PublishedYear = b.PublishedYear
-                })
+            var booksQuery = _context.Books
+            .OrderBy(b => b.Title)
+            .Include(b => b.Author)
+            .Include(b => b.Publisher)
+            .Select(b => new BookDto
+            {
+                Id = b.Id,
+                Title = b.Title,
+                AuthorId = b.AuthorId,
+                AuthorName = b.Author.Name,
+                PublisherId = b.PublisherId,
+                PublisherName = b.Publisher.Name,
+                Genre = b.Genre,
+                PublishedYear = b.PublishedYear
+            });
+
+            var totalCount = await booksQuery.CountAsync();
+
+            var books = await booksQuery
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
+
+            return (books, totalCount);
         }
 
         public async Task<BookDto> GetBookById(int id)

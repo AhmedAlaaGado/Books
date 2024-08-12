@@ -1,12 +1,15 @@
-﻿@model List<Books.ViewModels.BookViewModel>
+﻿@model Books.ViewModels.BookListViewModel
 
 @{
     ViewData["Title"] = "Books List";
 }
 
 <h2>@ViewData["Title"]</h2>
+<div class="float-end">
+    <a asp-action="Create" class="btn btn-primary">Add New Book</a>
+</div>
 
-<table class="table">
+<table class="table table-striped">
     <thead>
         <tr>
             <th>Title</th>
@@ -18,7 +21,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var book in Model)
+        @foreach (var book in Model.Books)
         {
             <tr>
                 <td>@book.Title</td>
@@ -34,4 +37,20 @@
         }
     </tbody>
 </table>
-<a asp-action="Create" class="btn btn-primary">Add New Book</a>
+
+<div class="pagination">
+    @if (Model.PageNumber > 1)
+    {
+        <a asp-action="Index" asp-route-pageNumber="@(Model.PageNumber - 1)" asp-route-pageSize="@Model.PageSize" class="btn btn-default">Previous</a>
+    }
+
+    @for (int i = 1; i <= Model.TotalPages; i++)
+    {
+        <a asp-action="Index" asp-route-pageNumber="@i" asp-route-pageSize="@Model.PageSize" class="btn @(i == Model.PageNumber ? "btn-primary" : "btn-default")">@i</a>
+    }
+
+    @if (Model.PageNumber < Model.TotalPages)
+    {
+        <a asp-action="Index" asp-route-pageNumber="@(Model.PageNumber + 1)" asp-route-pageSize="@Model.PageSize" class="btn btn-default">Next</a>
+    }
+</div>
